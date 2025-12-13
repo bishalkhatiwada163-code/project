@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
+// server cron: warming/cache scheduling
+import '@/server/cron';
 import Navigation from '@/components/Navigation';
 
 const inter = Inter({ subsets: ['latin'] });

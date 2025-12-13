@@ -29,11 +29,13 @@ function LivePageContent() {
     // Refresh every 10 seconds
     const interval = setInterval(fetchMatches, 10000);
     return () => clearInterval(interval);
-  }, []);
+  }, [filter]);
 
   const fetchMatches = async () => {
     try {
-      const response = await fetch('/api/matches/live');
+      // Fetch live matches and prefer server-side filtering
+      const sportsQuery = filter === 'all' ? 'football,basketball,cricket' : filter;
+      const response = await fetch(`/api/matches/live?sports=${encodeURIComponent(sportsQuery)}`);
       const result = await response.json();
       if (result.success) {
         setMatches(result.data);
@@ -146,7 +148,7 @@ function LivePageContent() {
             No live matches right now
           </h3>
           <p className="text-gray-500">
-            Check back soon or view upcoming matches
+            Check the <a href="/upcoming" className="text-purple-400 hover:text-purple-300 underline">upcoming matches</a> page for scheduled fixtures
           </p>
         </motion.div>
       ) : (

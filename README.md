@@ -43,6 +43,88 @@ A stunning, modern web application that provides live sports scores and AI-power
 3. **Open your browser:**
    Navigate to [http://localhost:3000](http://localhost:3000)
 
+### Test the new endpoints
+
+After starting the dev server, you can test the team endpoints (they return mock data unless configured via env templates):
+
+```bash
+curl "http://localhost:3000/api/external/espn/team/chelsea/recent?sport=football"
+curl "http://localhost:3000/api/external/espn/team/chelsea/injuries?sport=football"
+curl "http://localhost:3000/api/external/espn/team/chelsea/upcoming?sport=football"
+```
+
+Open the team page:
+
+```
+http://localhost:3000/team/football/chelsea
+
+### Server-side Cache & Refresh
+
+This app now ships with a simple in-memory cache used by the team endpoints and the live matches feed to reduce requests to external APIs. Configuration options (via `.env.local`):
+
+- `CACHE_TTL_RECENT` — recent matches TTL in seconds (default: 300)
+- `CACHE_TTL_INJURIES` — injuries TTL in seconds (default: 300)
+- `CACHE_TTL_UPCOMING` — team upcoming TTL in seconds (default: 60)
+- `CACHE_TTL_LIVE` — live matches TTL in seconds (default: 10)
+
+### Redis (optional, multi-instance)
+
+You can enable Redis-backed caching for multi-instance deployments. Set the following environment variables in `.env.local`:
+
+- `USE_REDIS=true` — enable Redis adapter
+- `REDIS_URL` — full Redis connection string (e.g. `redis://:password@redis-host:6379`)
+
+If `USE_REDIS` or `REDIS_URL` is present, the app will attempt to use Redis for `get`, `set`, `fetchOrSet`, and `del`. Make sure you have `ioredis` installed (already included in `package.json`).
+
+Example:
+
+```
+USE_REDIS=true
+REDIS_URL=redis://127.0.0.1:6379
+```
+
+Note: the in-memory cache remains the fallback if Redis is unavailable.
+
+### Admin endpoints & scheduled warming
+
+- **Clear cache:** `POST /api/admin/cache/clear` — requires header `x-admin-token: <ADMIN_TOKEN>`; accept JSON body `{ "pattern": "team:*" }` to clear matching keys.
+- **Redis health:** `GET /api/admin/redis/health` — returns `available: true|false` and ping status.
+- **Scheduled warming:** Controlled via env vars:
+   Examples:
+
+   ```
+   # Clear all cache entries
+   curl -X POST -H "x-admin-token: devtoken" -H "Content-Type: application/json" -d '{"pattern":"*"}' http://localhost:3000/api/admin/cache/clear
+
+   # Warm caches immediately
+   curl -X POST -H "x-admin-token: devtoken" http://localhost:3000/api/admin/cache/warm
+
+   # Check Redis health
+   curl http://localhost:3000/api/admin/redis/health
+   ```
+   - `ENABLE_CACHE_WARM=true` — enable scheduled warming job
+   - `CACHE_WARM_CRON` — cron schedule expression (default `*/10 * * * *` = every 10 minutes)
+
+Enable admin token in `.env.local`:
+
+```
+ADMIN_TOKEN=your_secret_token
+ENABLE_CACHE_WARM=true
+CACHE_WARM_CRON=*/10 * * * *
+```
+
+Security note: don't expose admin endpoints publicly — use network restrictions or authentication.
+
+The cache is in-memory — suitable for single-instance deployments. For production or multi-instance setups, use Redis or another shared cache.
+
+You can warm server caches for teams listed in the upcoming match feed using the included script. Make sure your dev server is running (e.g., `npm run dev`) and run:
+
+```bash
+npm run refresh-cache
+```
+
+```
+
 ### Build for Production
 
 ```bash
@@ -105,6 +187,30 @@ Currently using mock data. To integrate real sports data:
    SPORTS_API_KEY=your_api_key_here
    ```
 3. Update the API routes in `app/api/matches/` to fetch real data
+
+### ESPN Integration & Webscraping
+
+If you want to fetch team recent matches and injuries from ESPN or another public feed, configure the following environment variables. The app will try to use the configured templates and fall back to mock data if no external endpoint is configured.
+
+- `ESPN_TEAM_RECENT_TEMPLATE` — A template for a recent matches endpoint, example: `https://site.api.espn.com/apis/site/v2/sports/{sport}/teams/{teamId}/schedule`
+- `ESPN_TEAM_INJURIES_TEMPLATE` — A template for an injuries endpoint, example: `https://site.api.espn.com/apis/site/v2/sports/{sport}/teams/{teamId}/injuries`
+- `ESPN_TEAM_INJURIES_TEMPLATE` — A template for an injuries endpoint, example: `https://site.api.espn.com/apis/site/v2/sports/{sport}/teams/{teamId}/injuries`
+- `ESPNCRICINFO_TEAM_TEMPLATE` — (optional) template for ESPNcricinfo team pages, example: `https://www.espncricinfo.com/team/{slug}-{teamId}`
+- `NEXT_PUBLIC_BASE_PATH` — (optional) API base path if your app is served under a path prefix
+- `ESPN_TEAM_RECENT_TEMPLATE` — A template for a recent matches endpoint, example: `https://site.api.espn.com/apis/site/v2/sports/{sport}/teams/{teamId}/schedule`
+- `ESPN_TEAM_INJURIES_TEMPLATE` — A template for an injuries endpoint, example: `https://site.api.espn.com/apis/site/v2/sports/{sport}/teams/{teamId}/injuries`
+- `ESPN_TEAM_UPCOMING_TEMPLATE` — (optional) template for team-specific upcoming matches
+- `NEXT_PUBLIC_BASE_PATH` — (optional) API base path if your app is served under a path prefix
+
+Replace `{sport}` and `{teamId}` in the templates with values like `football`, `basketball`, `cricket`, and the team's id used by ESPN (or any other API). If the API you choose returns data in a different shape, implement a small adapter in the corresponding server route to normalize the payload to the format used by the frontend.
+
+Example `.env.local`:
+
+```
+ESPN_TEAM_RECENT_TEMPLATE=https://site.api.espn.com/apis/site/v2/sports/{sport}/teams/{teamId}/schedule
+ESPN_TEAM_INJURIES_TEMPLATE=https://site.api.espn.com/apis/site/v2/sports/{sport}/teams/{teamId}/injuries
+NEXT_PUBLIC_BASE_PATH=
+```
 
 ## 🎯 Future Enhancements
 

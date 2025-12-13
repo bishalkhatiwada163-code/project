@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { Match } from '@/lib/types';
 
-// Mock data for upcoming matches
-const upcomingMatches: Match[] = [
+// Fallback mock data (used only if ESPN returns nothing)
+const mockUpcomingMatches: Match[] = [
   {
     id: 'upcoming-1',
     sport: 'football',
@@ -447,13 +447,177 @@ const upcomingMatches: Match[] = [
   },
 ];
 
+async function fetchUpcomingFromESPN(): Promise<Match[]> {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 8000);
+
+  const endpoints = [
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard', sport: 'football' as const, league: 'Premier League' },
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/scoreboard', sport: 'football' as const, league: 'La Liga' },
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/ger.1/scoreboard', sport: 'football' as const, league: 'Bundesliga' },
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/ita.1/scoreboard', sport: 'football' as const, league: 'Serie A' },
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/fra.1/scoreboard', sport: 'football' as const, league: 'Ligue 1' },
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard', sport: 'basketball' as const, league: 'NBA' },
+  ];
+
+  const results: Match[] = [];
+
+  for (const endpoint of endpoints) {
+    try {
+      console.log(`📅 Fetching upcoming ${endpoint.league} fixtures...`);
+      const res = await fetch(endpoint.url, {
+        signal: controller.signal,
+        cache: 'no-store',
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+          'Accept': 'application/json',
+          'Accept-Language': 'en-US,en;q=0.9',
+        },
+      });
+
+      if (!res.ok) {
+        console.log(`⚠️  ESPN ${endpoint.league} returned ${res.status}`);
+        continue;
+      }
+
+      const data = await res.json();
+      const events = data.events || [];
+      console.log(`   Found ${events.length} total events`);
+
+      const upcomingEvents = events.filter((e: any) => {
+        const state = e.status?.type?.state || '';
+        const completed = e.status?.type?.completed || false;
+        return state !== 'in' && !completed; // not live, not finished
+      }).slice(0, 6);
+
+      console.log(`   ${upcomingEvents.length} upcoming fixtures`);
+
+      upcomingEvents.forEach((e: any) => {
+        const comp = e.competitions?.[0] || {};
+        const competitors = comp.competitors || [];
+        const home = competitors.find((c: any) => c.homeAway === 'home') || competitors[0] || {};
+        const away = competitors.find((c: any) => c.homeAway === 'away') || competitors[1] || {};
+
+        const match: Match = {
+          id: e.id || `${endpoint.sport}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+          sport: endpoint.sport,
+          homeTeam: {
+            id: home.team?.id || 'home',
+            name: home.team?.displayName || home.team?.name || home.team?.shortDisplayName || 'Home',
+            logo: home.team?.logo || home.team?.logos?.[0]?.href || '',
+            form: 'N/A',
+            ranking: 0,
+            recentGoals: 0,
+            recentConceded: 0,
+          },
+          awayTeam: {
+            id: away.team?.id || 'away',
+            name: away.team?.displayName || away.team?.name || away.team?.shortDisplayName || 'Away',
+            logo: away.team?.logo || away.team?.logos?.[0]?.href || '',
+            form: 'N/A',
+            ranking: 0,
+            recentGoals: 0,
+            recentConceded: 0,
+          },
+          homeScore: 0,
+          awayScore: 0,
+          status: 'upcoming',
+          startTime: e.date || new Date().toISOString(),
+          league: comp.league?.name || endpoint.league,
+          venue: comp.venue?.fullName || 'TBA',
+        };
+
+        console.log(`   📅 ${match.homeTeam.name} vs ${match.awayTeam.name}`);
+        results.push(match);
+      });
+    } catch (err) {
+      console.error(`❌ Error fetching upcoming for ${endpoint.league}:`, err instanceof Error ? err.message : err);
+    }
+  }
+
+  clearTimeout(timeout);
+
+  if (results.length > 0) {
+    console.log(`✅ Upcoming fixtures collected: ${results.length}`);
+    return results;
+  }
+  console.log('⚠️  No upcoming fixtures from ESPN, using mock');
+  return mockUpcomingMatches;
+}
+
+async function hydrateForms(matches: Match[]): Promise<Match[]> {
+  const base = process.env.NEXT_PUBLIC_BASE_PATH || 'http://localhost:3000';
+  const cache = new Map<string, string | null>();
+
+  async function fetchForm(teamId: string, sport: string): Promise<string | null> {
+    const key = `${sport}:${teamId}`;
+    if (cache.has(key)) return cache.get(key) || null;
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 4000);
+      const res = await fetch(`${base}/api/external/espn/team/${encodeURIComponent(teamId)}/recent?sport=${encodeURIComponent(sport)}`, {
+        signal: controller.signal,
+        cache: 'no-store',
+      });
+      clearTimeout(timeout);
+      if (!res.ok) {
+        console.warn(`⚠️  Form fetch failed for team ${teamId}: ${res.status}`);
+        cache.set(key, null);
+        return null;
+      }
+      const json = await res.json();
+      const recent = Array.isArray(json.data) ? json.data : [];
+      // Ensure most recent match appears first
+      recent.sort((a: any, b: any) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+      const letters = recent
+        .slice(0, 5)
+        .map((r: any) => (r.result || '').toUpperCase()[0])
+        .filter((c: string) => ['W', 'D', 'L'].includes(c));
+      const form = letters.length ? letters.join('') : null;
+      console.log(`✅ Form for team ${teamId} (${sport}): ${form || 'N/A'}`);
+      cache.set(key, form);
+      return form;
+    } catch (err) {
+      console.warn(`❌ Error fetching form for team ${teamId}:`, err instanceof Error ? err.message : err);
+      return null;
+    }
+  }
+
+  console.log(`🔄 Hydrating forms for ${matches.length} matches`);
+  for (const m of matches) {
+    if (!m.homeTeam.form || m.homeTeam.form === 'N/A') {
+      const f = await fetchForm(String(m.homeTeam.id), m.sport);
+      if (f) {
+        m.homeTeam.form = f;
+        console.log(`   Set ${m.homeTeam.name} form to ${f}`);
+      }
+    }
+    if (!m.awayTeam.form || m.awayTeam.form === 'N/A') {
+      const f = await fetchForm(String(m.awayTeam.id), m.sport);
+      if (f) {
+        m.awayTeam.form = f;
+        console.log(`   Set ${m.awayTeam.name} form to ${f}`);
+      }
+    }
+  }
+
+  return matches;
+}
+
 export async function GET() {
-  // Simulate API delay
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  const { fetchOrSet } = await import('@/server/cache');
+  const ttl = Number(process.env.CACHE_TTL_UPCOMING || '60');
+  let data = await fetchOrSet('upcoming:all', ttl, fetchUpcomingFromESPN);
+
+  // Precompute form to avoid client fetches
+  data = await hydrateForms(data);
+
+  // Simulate small delay for UX consistency
+  await new Promise((resolve) => setTimeout(resolve, 200));
 
   return NextResponse.json({
     success: true,
-    data: upcomingMatches,
+    data,
     timestamp: new Date().toISOString(),
   });
 }

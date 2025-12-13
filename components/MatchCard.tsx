@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Match, Prediction } from '@/lib/types';
 import LiveIndicator from './LiveIndicator';
 import PredictionBar from './PredictionBar';
 import AnalysisModal from './AnalysisModal';
 import { Calendar, MapPin, Trophy } from 'lucide-react';
+import Link from 'next/link';
 import { format } from 'date-fns';
 
 interface MatchCardProps {
@@ -21,6 +22,39 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
   const [awayLogoError, setAwayLogoError] = useState(false);
   const isLive = match.status === 'live';
   const isUpcoming = match.status === 'upcoming';
+  const [homeForm, setHomeForm] = useState<string | null>(match.homeTeam.form || null);
+  const [awayForm, setAwayForm] = useState<string | null>(match.awayTeam.form || null);
+
+  useEffect(() => {
+    async function fetchTeamForm(teamId: string, sport: string): Promise<string | null> {
+      try {
+        const res = await fetch(`/api/external/espn/team/${encodeURIComponent(teamId)}/recent?sport=${encodeURIComponent(sport)}`, { cache: 'no-store' });
+        if (!res.ok) return null;
+        const json = await res.json();
+        const recent = Array.isArray(json.data) ? json.data : Array.isArray(json) ? json : [];
+        // Ensure most recent match appears first
+        recent.sort((a: any, b: any) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+        // recent items expected shape: { result: 'W'|'D'|'L' }
+        const letters = recent.slice(0, 5).map((r: any) => (r.result || '').toUpperCase()[0]).filter((c: string) => ['W','D','L'].includes(c));
+        return letters.length ? letters.join('') : null;
+      } catch {
+        return null;
+      }
+    }
+
+    // Only fetch if not provided or marked as N/A
+    (async () => {
+      if (!homeForm || homeForm === 'N/A') {
+        const f = await fetchTeamForm(String(match.homeTeam.id), match.sport);
+        if (f) setHomeForm(f);
+      }
+      if (!awayForm || awayForm === 'N/A') {
+        const f = await fetchTeamForm(String(match.awayTeam.id), match.sport);
+        if (f) setAwayForm(f);
+      }
+    })();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [match.homeTeam.id, match.awayTeam.id, match.sport]);
 
   const getSportIcon = () => {
     if (match.sport === 'football') return '⚽';
@@ -89,10 +123,14 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
                 )}
               </div>
               <div>
-                <h4 className="font-bold text-white text-lg">{match.homeTeam.name}</h4>
-                {match.homeTeam.form && (
-                  <div className="flex items-center space-x-1 mt-1">
-                    {match.homeTeam.form.split('').map((result, idx) => (
+                <h4 className="font-bold text-white text-lg">
+                  <Link href={`/team/${match.sport}/${match.homeTeam.id}`} className="hover:underline">
+                    {match.homeTeam.name}
+                  </Link>
+                </h4>
+                <div className="flex items-center space-x-1 mt-1">
+                  {(homeForm && homeForm !== 'N/A') ? (
+                    homeForm.split('').map((result, idx) => (
                       <span
                         key={idx}
                         className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
@@ -101,9 +139,16 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
                       >
                         {result}
                       </span>
-                    ))}
-                  </div>
-                )}
+                    ))
+                  ) : (
+                    // Legend placeholders when form is not available
+                    <>
+                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold bg-green-500">W</span>
+                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold bg-yellow-500">D</span>
+                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold bg-red-500">L</span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
             {match.homeScore !== undefined && (
@@ -143,10 +188,14 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
                 )}
               </div>
               <div>
-                <h4 className="font-bold text-white text-lg">{match.awayTeam.name}</h4>
-                {match.awayTeam.form && (
-                  <div className="flex items-center space-x-1 mt-1">
-                    {match.awayTeam.form.split('').map((result, idx) => (
+                <h4 className="font-bold text-white text-lg">
+                  <Link href={`/team/${match.sport}/${match.awayTeam.id}`} className="hover:underline">
+                    {match.awayTeam.name}
+                  </Link>
+                </h4>
+                <div className="flex items-center space-x-1 mt-1">
+                  {(awayForm && awayForm !== 'N/A') ? (
+                    awayForm.split('').map((result, idx) => (
                       <span
                         key={idx}
                         className={`w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold ${
@@ -155,9 +204,16 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
                       >
                         {result}
                       </span>
-                    ))}
-                  </div>
-                )}
+                    ))
+                  ) : (
+                    // Legend placeholders when form is not available
+                    <>
+                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold bg-green-500">W</span>
+                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold bg-yellow-500">D</span>
+                      <span className="w-5 h-5 rounded-full flex items-center justify-center text-xs font-bold bg-red-500">L</span>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
             {match.awayScore !== undefined && (
