@@ -114,25 +114,25 @@ export default function Navigation() {
 
   return (
     <nav className="sticky top-0 z-50 glass-effect border-b border-white/10">
-      <div className="container mx-auto px-4">
-        <div className="flex items-center justify-center h-20 relative">
-          {/* Logo - Centered */}
-          <Link href="/" className="flex items-center space-x-3 group absolute left-1/2 -translate-x-1/2">
+      <div className="container mx-auto px-2 sm:px-4">
+        <div className="flex items-center justify-between h-16 sm:h-20">
+          {/* Logo */}
+          <Link href="/" className="flex items-center space-x-2 sm:space-x-3 group flex-shrink-0">
             <motion.div
               whileHover={{ rotate: 360 }}
               transition={{ duration: 0.6 }}
               className="relative"
             >
-              <Trophy className="w-10 h-10 text-yellow-400 glow" />
+              <Trophy className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-yellow-400 glow" />
               <div className="absolute inset-0 bg-yellow-400/20 blur-xl rounded-full" />
             </motion.div>
-            <h1 className="text-2xl font-bold gradient-text">
+            <h1 className="text-base sm:text-xl md:text-2xl font-bold gradient-text">
               SportPredict
             </h1>
           </Link>
 
           {/* Navigation Links */}
-          <div className="flex items-center space-x-2 absolute left-4">
+          <div className="flex items-center space-x-1 sm:space-x-2">
             {navItems.map((item) => {
               const Icon = item.icon;
               const isActive = pathname === item.href;
@@ -143,16 +143,16 @@ export default function Navigation() {
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
                     className={`
-                      relative px-6 py-2.5 rounded-xl font-semibold transition-all duration-300
+                      relative px-2 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold transition-all duration-300
                       ${isActive 
                         ? 'bg-gradient-to-r from-purple-500 to-pink-500 text-white shadow-lg shadow-purple-500/50' 
                         : 'text-gray-300 hover:text-white hover:bg-white/5'
                       }
                     `}
                   >
-                    <div className="flex items-center space-x-2">
-                      <Icon className="w-5 h-5" />
-                      <span>{item.label}</span>
+                    <div className="flex items-center space-x-1 sm:space-x-2">
+                      <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      <span className="text-xs sm:text-sm md:text-base">{item.label}</span>
                     </div>
                     {isActive && (
                       <motion.div
@@ -168,9 +168,9 @@ export default function Navigation() {
           </div>
 
           {/* Search Bar & CTA - Right Side */}
-          <div className="flex items-center space-x-3 absolute right-4">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {/* Enhanced Search Bar with Dropdown */}
-            <div ref={searchRef} className="relative hidden md:block">
+            <div ref={searchRef} className="relative hidden lg:block">
               <motion.form
                 onSubmit={handleSearch}
                 initial={{ opacity: 0, x: 20 }}
@@ -200,7 +200,7 @@ export default function Navigation() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     onFocus={() => setIsFocused(true)}
                     placeholder="Search teams..."
-                    className="pl-11 pr-20 py-3 w-64 lg:w-72 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-md border-2 border-purple-500/30 rounded-2xl text-white placeholder-gray-400 text-sm font-medium focus:outline-none focus:border-purple-500/60 transition-all duration-300 shadow-lg"
+                    className="pl-11 pr-20 py-2.5 sm:py-3 w-48 sm:w-56 lg:w-72 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-md border-2 border-purple-500/30 rounded-2xl text-white placeholder-gray-400 text-sm font-medium focus:outline-none focus:border-purple-500/60 transition-all duration-300 shadow-lg"
                   />
 
                   {/* Search submit button */}
@@ -319,7 +319,7 @@ export default function Navigation() {
             <motion.button
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
-              className="btn-primary hidden lg:block"
+              className="btn-primary hidden xl:block"
             >
               Get Premium
             </motion.button>

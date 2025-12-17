@@ -45,13 +45,13 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-16 px-4">
+    <div className="min-h-[80vh] flex flex-col items-center justify-center space-y-8 sm:space-y-12 lg:space-y-16 px-4">
       {/* Hero Section */}
       <motion.div
         initial={{ opacity: 0, y: -30 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.8 }}
-        className="text-center space-y-6"
+        className="text-center space-y-4 sm:space-y-6"
       >
         {/* Animated Trophy Icon */}
         <motion.div
@@ -61,7 +61,7 @@ export default function HomePage() {
           className="flex justify-center"
         >
           <div className="relative">
-            <Trophy className="w-24 h-24 text-yellow-400 glow" />
+            <Trophy className="w-16 h-16 sm:w-20 sm:h-20 lg:w-24 lg:h-24 text-yellow-400 glow" />
             <motion.div
               animate={{
                 scale: [1, 1.3, 1],
@@ -79,7 +79,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3 }}
-            className="text-6xl md:text-8xl font-bold gradient-text mb-4"
+            className="text-4xl sm:text-5xl md:text-6xl lg:text-8xl font-bold gradient-text mb-2 sm:mb-4"
           >
             SportPredict
           </motion.h1>
@@ -89,9 +89,9 @@ export default function HomePage() {
             transition={{ delay: 0.5 }}
             className="flex items-center justify-center space-x-2 text-yellow-400"
           >
-            <Sparkles className="w-5 h-5" />
-            <p className="text-xl font-semibold">AI-Powered Sports Predictions</p>
-            <Sparkles className="w-5 h-5" />
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
+            <p className="text-base sm:text-lg lg:text-xl font-semibold">AI-Powered Sports Predictions</p>
+            <Sparkles className="w-4 h-4 sm:w-5 sm:h-5" />
           </motion.div>
         </div>
 
@@ -99,7 +99,7 @@ export default function HomePage() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.7 }}
-          className="text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed"
+          className="text-base sm:text-lg md:text-xl lg:text-2xl text-gray-300 max-w-3xl mx-auto leading-relaxed px-4"
         >
           Choose your favorite sport and get <span className="text-cyan-400 font-bold">live scores</span> and <span className="text-pink-400 font-bold">AI predictions</span>
         </motion.p>
@@ -110,9 +110,9 @@ export default function HomePage() {
         initial={{ opacity: 0, y: 40 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.9, duration: 0.6 }}
-        className="w-full max-w-6xl"
+        className="w-full max-w-6xl px-4"
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6 md:gap-8">
           {sports.map((sport, index) => (
             <motion.div
               key={sport.id}
@@ -124,7 +124,7 @@ export default function HomePage() {
               onClick={() => handleSportSelect(sport.id)}
               className="cursor-pointer"
             >
-              <div className={`glass-card p-8 bg-gradient-to-br ${sport.gradient} ${sport.hoverGradient} shadow-2xl ${sport.shadow} transition-all duration-500 border-2 border-white/20 hover:border-white/40 group relative overflow-hidden`}>
+              <div className={`glass-card p-4 sm:p-6 md:p-8 bg-gradient-to-br ${sport.gradient} ${sport.hoverGradient} shadow-2xl ${sport.shadow} transition-all duration-500 border-2 border-white/20 hover:border-white/40 group relative overflow-hidden`}>
                 {/* Animated Background Glow */}
                 <motion.div
                   className={`absolute inset-0 ${sport.glowColor} blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-500`}
@@ -135,24 +135,24 @@ export default function HomePage() {
                 />
 
                 {/* Content */}
-                <div className="relative z-10 space-y-6 text-center">
+                <div className="relative z-10 space-y-4 sm:space-y-6 text-center">
                   {/* Sport Icon */}
                   <motion.div
                     animate={{
                       rotate: [0, 10, -10, 0],
                     }}
                     transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
-                    className="text-8xl group-hover:scale-110 transition-transform duration-300"
+                    className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl group-hover:scale-110 transition-transform duration-300"
                   >
                     {sport.icon}
                   </motion.div>
 
                   {/* Sport Name */}
                   <div>
-                    <h2 className="text-4xl font-bold text-white mb-2 group-hover:scale-105 transition-transform">
+                    <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2 group-hover:scale-105 transition-transform">
                       {sport.name}
                     </h2>
-                    <p className="text-white/80 text-sm font-medium">
+                    <p className="text-white/80 text-xs sm:text-sm font-medium">
                       {sport.description}
                     </p>
                   </div>
@@ -161,7 +161,7 @@ export default function HomePage() {
                   <motion.button
                     whileHover={{ scale: 1.05 }}
                     whileTap={{ scale: 0.95 }}
-                    className="w-full py-4 px-6 bg-white/20 backdrop-blur-sm rounded-xl font-bold text-white border-2 border-white/30 hover:bg-white/30 hover:border-white/50 transition-all duration-300 shadow-lg"
+                    className="w-full py-3 sm:py-4 px-4 sm:px-6 bg-white/20 backdrop-blur-sm rounded-xl font-bold text-sm sm:text-base text-white border-2 border-white/30 hover:bg-white/30 hover:border-white/50 transition-all duration-300 shadow-lg"
                   >
                     View {sport.name} Matches
                   </motion.button>
@@ -180,20 +180,20 @@ export default function HomePage() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.5 }}
-        className="glass-card p-8 max-w-4xl mx-auto"
+        className="glass-card p-4 sm:p-6 md:p-8 max-w-4xl mx-auto w-full"
       >
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+        <div className="grid grid-cols-3 gap-4 sm:gap-6 md:gap-8 text-center">
           <div>
-            <p className="text-4xl font-bold gradient-text mb-2">95%</p>
-            <p className="text-gray-400">Prediction Accuracy</p>
+            <p className="text-2xl sm:text-3xl md:text-4xl font-bold gradient-text mb-1 sm:mb-2">95%</p>
+            <p className="text-gray-400 text-xs sm:text-sm md:text-base">Prediction Accuracy</p>
           </div>
           <div>
-            <p className="text-4xl font-bold gradient-text mb-2">24/7</p>
-            <p className="text-gray-400">Live Updates</p>
+            <p className="text-2xl sm:text-3xl md:text-4xl font-bold gradient-text mb-1 sm:mb-2">24/7</p>
+            <p className="text-gray-400 text-xs sm:text-sm md:text-base">Live Updates</p>
           </div>
           <div>
-            <p className="text-4xl font-bold gradient-text mb-2">100+</p>
-            <p className="text-gray-400">Matches Weekly</p>
+            <p className="text-2xl sm:text-3xl md:text-4xl font-bold gradient-text mb-1 sm:mb-2">100+</p>
+            <p className="text-gray-400 text-xs sm:text-sm md:text-base">Matches Weekly</p>
           </div>
         </div>
       </motion.div>

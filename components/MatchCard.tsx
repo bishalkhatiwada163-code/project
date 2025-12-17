@@ -75,19 +75,19 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
       whileHover={{ y: -5 }}
       className="match-card-hover"
     >
-      <div className={`glass-card p-6 bg-gradient-to-br ${getSportGradient()} border-2 ${isLive ? 'border-red-500/50 glow-red' : 'border-white/10'}`}>
+      <div className={`glass-card p-3 sm:p-4 md:p-6 bg-gradient-to-br ${getSportGradient()} border-2 ${isLive ? 'border-red-500/50 glow-red' : 'border-white/10'}`}>
         {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-3">
-            <div className="text-3xl">
+        <div className="flex items-center justify-between mb-3 sm:mb-4">
+          <div className="flex items-center space-x-2 sm:space-x-3">
+            <div className="text-2xl sm:text-3xl">
               {getSportIcon()}
             </div>
             <div>
-              <h3 className="font-bold text-white text-sm">{match.league}</h3>
+              <h3 className="font-bold text-white text-xs sm:text-sm">{match.league}</h3>
               {match.venue && (
                 <p className="text-xs text-gray-400 flex items-center space-x-1">
                   <MapPin className="w-3 h-3" />
-                  <span>{match.venue}</span>
+                  <span className="truncate max-w-[120px] sm:max-w-none">{match.venue}</span>
                 </p>
               )}
             </div>
@@ -95,22 +95,23 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
 
           {isLive && <LiveIndicator minute={match.minute} />}
           {isUpcoming && (
-            <div className="flex items-center space-x-1 text-gray-400 text-xs">
-              <Calendar className="w-4 h-4" />
-              <span>{format(new Date(match.startTime), 'MMM dd, HH:mm')}</span>
+            <div className="flex items-center space-x-1 text-gray-400 text-xs flex-shrink-0">
+              <Calendar className="w-3 h-3 sm:w-4 sm:h-4" />
+              <span className="hidden sm:inline">{format(new Date(match.startTime), 'MMM dd, HH:mm')}</span>
+              <span className="sm:hidden">{format(new Date(match.startTime), 'MMM dd')}</span>
             </div>
           )}
         </div>
 
         {/* Teams and Scores */}
-        <div className="space-y-4 mb-6">
+        <div className="space-y-3 sm:space-y-4 mb-4 sm:mb-6">
           {/* Home Team */}
           <motion.div
             whileHover={{ x: 5 }}
-            className="flex items-center justify-between p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10"
+            className="flex items-center justify-between p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl bg-white/5 backdrop-blur-sm border border-white/10"
           >
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center font-bold text-lg shadow-lg overflow-hidden border-2 border-white/20">
+            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center font-bold text-sm sm:text-base md:text-lg shadow-lg overflow-hidden border-2 border-white/20 flex-shrink-0">
                 {match.homeTeam.logo && !homeLogoError ? (
                   <img 
                     src={match.homeTeam.logo} 
@@ -119,11 +120,11 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
                     onError={() => setHomeLogoError(true)}
                   />
                 ) : (
-                  <span className="text-sm">{match.homeTeam.name.substring(0, 2).toUpperCase()}</span>
+                  <span className="text-xs sm:text-sm">{match.homeTeam.name.substring(0, 2).toUpperCase()}</span>
                 )}
               </div>
-              <div>
-                <h4 className="font-bold text-white text-lg">
+              <div className="min-w-0">
+                <h4 className="font-bold text-white text-sm sm:text-base md:text-lg truncate">
                   <Link href={`/team/${match.sport}/${match.homeTeam.id}`} className="hover:underline">
                     {match.homeTeam.name}
                   </Link>
@@ -155,7 +156,7 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="text-4xl font-bold gradient-text"
+                className="text-2xl sm:text-3xl md:text-4xl font-bold gradient-text flex-shrink-0"
               >
                 {match.homeScore}
               </motion.div>
@@ -164,18 +165,18 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
 
           {/* VS Divider */}
           <div className="flex items-center justify-center">
-            <div className="px-6 py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-white/20 backdrop-blur-sm">
-              <span className="text-gray-300 font-bold text-sm">VS</span>
+            <div className="px-4 sm:px-6 py-1.5 sm:py-2 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-white/20 backdrop-blur-sm">
+              <span className="text-gray-300 font-bold text-xs sm:text-sm">VS</span>
             </div>
           </div>
 
           {/* Away Team */}
           <motion.div
             whileHover={{ x: 5 }}
-            className="flex items-center justify-between p-4 rounded-xl bg-white/5 backdrop-blur-sm border border-white/10"
+            className="flex items-center justify-between p-2 sm:p-3 md:p-4 rounded-lg sm:rounded-xl bg-white/5 backdrop-blur-sm border border-white/10"
           >
-            <div className="flex items-center space-x-3">
-              <div className="w-12 h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center font-bold text-lg shadow-lg overflow-hidden border-2 border-white/20">
+            <div className="flex items-center space-x-2 sm:space-x-3 min-w-0">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center font-bold text-sm sm:text-base md:text-lg shadow-lg overflow-hidden border-2 border-white/20 flex-shrink-0">
                 {match.awayTeam.logo && !awayLogoError ? (
                   <img 
                     src={match.awayTeam.logo} 
@@ -184,11 +185,11 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
                     onError={() => setAwayLogoError(true)}
                   />
                 ) : (
-                  <span className="text-sm">{match.awayTeam.name.substring(0, 2).toUpperCase()}</span>
+                  <span className="text-xs sm:text-sm">{match.awayTeam.name.substring(0, 2).toUpperCase()}</span>
                 )}
               </div>
-              <div>
-                <h4 className="font-bold text-white text-lg">
+              <div className="min-w-0">
+                <h4 className="font-bold text-white text-sm sm:text-base md:text-lg truncate">
                   <Link href={`/team/${match.sport}/${match.awayTeam.id}`} className="hover:underline">
                     {match.awayTeam.name}
                   </Link>
@@ -220,7 +221,7 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
               <motion.div
                 initial={{ scale: 0 }}
                 animate={{ scale: 1 }}
-                className="text-4xl font-bold gradient-text"
+                className="text-2xl sm:text-3xl md:text-4xl font-bold gradient-text flex-shrink-0"
               >
                 {match.awayScore}
               </motion.div>
@@ -234,7 +235,7 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             transition={{ delay: 0.3 }}
-            className="pt-4 border-t border-white/10"
+            className="pt-3 sm:pt-4 border-t border-white/10"
           >
             <PredictionBar
               homeTeam={match.homeTeam.name}
@@ -263,14 +264,14 @@ export default function MatchCard({ match, prediction, showPrediction = true }: 
           whileTap={{ scale: 0.98 }}
           onClick={() => prediction && setIsModalOpen(true)}
           disabled={!prediction}
-          className={`w-full mt-4 py-3 rounded-xl font-semibold flex items-center justify-center space-x-2 group transition-all duration-300 ${
+          className={`w-full mt-3 sm:mt-4 py-2.5 sm:py-3 rounded-lg sm:rounded-xl font-semibold text-sm sm:text-base flex items-center justify-center space-x-2 group transition-all duration-300 ${
             prediction
               ? 'bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/50 hover:border-purple-400 cursor-pointer'
               : 'bg-gray-500/10 border border-gray-500/30 cursor-not-allowed opacity-50'
           }`}
         >
           <Trophy className="w-4 h-4 group-hover:rotate-12 transition-transform" />
-          <span>{prediction ? 'View Full Analysis' : 'Analysis Unavailable'}</span>
+          <span className="truncate">{prediction ? 'View Full Analysis' : 'Analysis Unavailable'}</span>
         </motion.button>
 
         {/* Analysis Modal */}

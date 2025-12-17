@@ -92,14 +92,14 @@ function LivePageContent() {
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6 sm:space-y-8">
       {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="text-center space-y-4"
+        className="text-center space-y-3 sm:space-y-4"
       >
-        <div className="flex items-center justify-center space-x-4">
+        <div className="flex items-center justify-center space-x-3 sm:space-x-4">
           <motion.div
             animate={{
               scale: [1, 1.1, 1],
@@ -107,11 +107,11 @@ function LivePageContent() {
             }}
             transition={{ duration: 2, repeat: Infinity }}
           >
-            <Radio className="w-12 h-12 text-red-400 glow-red" />
+            <Radio className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 text-red-400 glow-red" />
           </motion.div>
-          <h1 className="text-5xl font-bold gradient-text">Live Matches</h1>
+          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold gradient-text">Live Matches</h1>
         </div>
-        <p className="text-gray-300 text-lg">
+        <p className="text-gray-300 text-sm sm:text-base md:text-lg px-4">
           Watch real-time scores and follow the action as it happens
         </p>
 
@@ -135,9 +135,9 @@ function LivePageContent() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
-        className="flex items-center justify-center space-x-4"
+        className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 px-4"
       >
-        <Filter className="w-5 h-5 text-gray-400" />
+        <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 hidden sm:block" />
         {(['all', 'football', 'basketball', 'cricket'] as const).map((sport) => (
           <motion.button
             key={sport}
@@ -145,7 +145,7 @@ function LivePageContent() {
             whileTap={{ scale: 0.95 }}
             onClick={() => setFilter(sport)}
             className={`
-              px-6 py-2.5 rounded-xl font-semibold transition-all duration-300
+              px-3 sm:px-4 md:px-6 py-2 sm:py-2.5 rounded-lg sm:rounded-xl font-semibold text-xs sm:text-sm md:text-base transition-all duration-300
               ${filter === sport
                 ? 'bg-gradient-to-r from-red-500 to-pink-500 text-white shadow-lg shadow-red-500/50'
                 : 'glass-card text-gray-300 hover:text-white'
@@ -163,13 +163,13 @@ function LivePageContent() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.3 }}
-          className="glass-card p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-cyan-500/30"
+          className="glass-card p-4 sm:p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-cyan-500/30 mx-4 sm:mx-0"
         >
-          <div className="flex items-start space-x-4">
-            <Activity className="w-6 h-6 text-cyan-400 flex-shrink-0 mt-1" />
+          <div className="flex items-start space-x-3 sm:space-x-4">
+            <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-cyan-400 flex-shrink-0 mt-1" />
             <div>
-              <h3 className="font-bold text-white mb-2">No Live Matches Currently</h3>
-              <p className="text-gray-300 text-sm leading-relaxed">
+              <h3 className="font-bold text-white text-sm sm:text-base mb-1 sm:mb-2">No Live Matches Currently</h3>
+              <p className="text-gray-300 text-xs sm:text-sm leading-relaxed">
                 There are no live matches at the moment. Showing upcoming matches instead.
               </p>
             </div>
@@ -182,13 +182,13 @@ function LivePageContent() {
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          className="text-center py-20"
+          className="text-center py-12 sm:py-20 px-4"
         >
-          <Activity className="w-20 h-20 text-gray-600 mx-auto mb-4" />
-          <h3 className="text-2xl font-bold text-gray-400 mb-2">
+          <Activity className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 text-gray-600 mx-auto mb-3 sm:mb-4" />
+          <h3 className="text-xl sm:text-2xl font-bold text-gray-400 mb-2">
             No matches available
           </h3>
-          <p className="text-gray-500">
+          <p className="text-sm sm:text-base text-gray-500">
             There are no live or upcoming matches for this sport right now
           </p>
         </motion.div>
@@ -197,7 +197,7 @@ function LivePageContent() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.3 }}
-          className="grid grid-cols-1 lg:grid-cols-2 gap-6"
+          className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6"
         >
           {filteredMatches.map((match, index) => (
             <motion.div
