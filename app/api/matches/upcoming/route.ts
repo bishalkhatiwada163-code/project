@@ -455,8 +455,9 @@ async function fetchUpcomingFromESPN(): Promise<Match[]> {
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/ita.1/scoreboard', sport: 'football' as const, league: 'Serie A' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/fra.1/scoreboard', sport: 'football' as const, league: 'Ligue 1' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard', sport: 'basketball' as const, league: 'NBA' },
-    { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard', sport: 'cricket' as const, league: 'Cricket' },
-    { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/icc.t20wc/scoreboard', sport: 'cricket' as const, league: 'ICC T20' },
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/int/scoreboard', sport: 'cricket' as const, league: 'International Cricket' },
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/aus-bbl/scoreboard', sport: 'cricket' as const, league: 'Big Bash League' },
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/ind-ipl/scoreboard', sport: 'cricket' as const, league: 'Indian Premier League' },
   ];
 
   // Pull multiple days to ensure upcoming lists for basketball/cricket even when today is empty

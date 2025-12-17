@@ -103,7 +103,9 @@ async function fetchRemoteLiveMatches(): Promise<Match[] | null> {
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard', sport: 'football' as const, league: 'Premier League' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/scoreboard', sport: 'football' as const, league: 'MLS' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard', sport: 'basketball' as const, league: 'NBA' },
-    { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard', sport: 'cricket' as const, league: 'Cricket' },
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/int/scoreboard', sport: 'cricket' as const, league: 'International Cricket' },
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/aus-bbl/scoreboard', sport: 'cricket' as const, league: 'Big Bash League' },
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/ind-ipl/scoreboard', sport: 'cricket' as const, league: 'Indian Premier League' },
   ];
 
   const results: Match[] = [];
