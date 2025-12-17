@@ -21,7 +21,8 @@ async function warmCaches() {
       if (m.homeTeam?.id) teamIds.add(String(m.homeTeam.id));
       if (m.awayTeam?.id) teamIds.add(String(m.awayTeam.id));
     }
-    for (const id of teamIds) {
+    const teamIdArray = Array.from(teamIds);
+    for (const id of teamIdArray) {
       const sport = matches.find((m: any) => m.homeTeam?.id == id || m.awayTeam?.id == id)?.sport || 'football';
       const endpoints = [
         `/api/external/espn/team/${encodeURIComponent(id)}/recent?sport=${encodeURIComponent(sport)}`,
