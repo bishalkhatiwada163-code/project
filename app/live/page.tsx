@@ -37,7 +37,8 @@ function LivePageContent() {
       const sportsQuery = filter === 'all' ? 'football,basketball,cricket' : filter;
       const response = await fetch(`/api/matches/live?sports=${encodeURIComponent(sportsQuery)}`);
       const result = await response.json();
-      if (result.success) {
+      
+      if (result.success && result.data.length > 0) {
         setMatches(result.data);
 
         // Generate predictions for live matches too
@@ -46,6 +47,26 @@ function LivePageContent() {
           newPredictions.set(match.id, calculatePrediction(match));
         });
         setPredictions(newPredictions);
+      } else {
+        // No live matches, fetch upcoming matches instead
+        const upcomingResponse = await fetch('/api/matches/upcoming');
+        const upcomingResult = await upcomingResponse.json();
+        
+        if (upcomingResult.success) {
+          // Filter by sport if a specific sport is selected
+          const filteredData = filter === 'all' 
+            ? upcomingResult.data 
+            : upcomingResult.data.filter((m: Match) => m.sport === filter);
+          
+          setMatches(filteredData);
+
+          // Generate predictions
+          const newPredictions = new Map<string, Prediction>();
+          filteredData.forEach((match: Match) => {
+            newPredictions.set(match.id, calculatePrediction(match));
+          });
+          setPredictions(newPredictions);
+        }
       }
     } catch (error) {
       console.error('Failed to fetch matches:', error);
@@ -136,6 +157,26 @@ function LivePageContent() {
         ))}
       </motion.div>
 
+      {/* Info Banner */}
+      {matches.length > 0 && matches.every(m => m.status === 'upcoming') && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.3 }}
+          className="glass-card p-6 bg-gradient-to-r from-blue-500/10 to-cyan-500/10 border-cyan-500/30"
+        >
+          <div className="flex items-start space-x-4">
+            <Activity className="w-6 h-6 text-cyan-400 flex-shrink-0 mt-1" />
+            <div>
+              <h3 className="font-bold text-white mb-2">No Live Matches Currently</h3>
+              <p className="text-gray-300 text-sm leading-relaxed">
+                There are no live matches at the moment. Showing upcoming matches instead.
+              </p>
+            </div>
+          </div>
+        </motion.div>
+      )}
+
       {/* Matches Grid */}
       {filteredMatches.length === 0 ? (
         <motion.div
@@ -145,10 +186,10 @@ function LivePageContent() {
         >
           <Activity className="w-20 h-20 text-gray-600 mx-auto mb-4" />
           <h3 className="text-2xl font-bold text-gray-400 mb-2">
-            No live matches right now
+            No matches available
           </h3>
           <p className="text-gray-500">
-            Check the <a href="/upcoming" className="text-purple-400 hover:text-purple-300 underline">upcoming matches</a> page for scheduled fixtures
+            There are no live or upcoming matches for this sport right now
           </p>
         </motion.div>
       ) : (
@@ -168,7 +209,7 @@ function LivePageContent() {
               <MatchCard 
                 match={match} 
                 prediction={predictions.get(match.id)}
-                showPrediction={false} 
+                showPrediction={match.status === 'upcoming'} 
               />
             </motion.div>
           ))}

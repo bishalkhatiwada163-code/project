@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { Match } from '@/lib/types';
+import { Match, SportType } from '@/lib/types';
 
 // Fallback mock data (used only if ESPN returns nothing)
 const mockUpcomingMatches: Match[] = [
@@ -448,9 +448,6 @@ const mockUpcomingMatches: Match[] = [
 ];
 
 async function fetchUpcomingFromESPN(): Promise<Match[]> {
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 8000);
-
   const endpoints = [
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard', sport: 'football' as const, league: 'Premier League' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/scoreboard', sport: 'football' as const, league: 'La Liga' },
@@ -458,91 +455,114 @@ async function fetchUpcomingFromESPN(): Promise<Match[]> {
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/ita.1/scoreboard', sport: 'football' as const, league: 'Serie A' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/fra.1/scoreboard', sport: 'football' as const, league: 'Ligue 1' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard', sport: 'basketball' as const, league: 'NBA' },
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/scoreboard', sport: 'cricket' as const, league: 'Cricket' },
+    { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/icc.t20wc/scoreboard', sport: 'cricket' as const, league: 'ICC T20' },
   ];
 
+  // Pull multiple days to ensure upcoming lists for basketball/cricket even when today is empty
+  const dateStrings = [0, 1, 2, 3, 4, 5, 6, 7].map((offset) => {
+    const d = new Date();
+    d.setUTCDate(d.getUTCDate() + offset);
+    return d.toISOString().slice(0, 10).replace(/-/g, ''); // YYYYMMDD
+  });
+
   const results: Match[] = [];
+  const seen = new Set<string>();
 
   for (const endpoint of endpoints) {
     try {
-      console.log(`📅 Fetching upcoming ${endpoint.league} fixtures...`);
-      const res = await fetch(endpoint.url, {
-        signal: controller.signal,
-        cache: 'no-store',
-        headers: {
-          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-          'Accept': 'application/json',
-          'Accept-Language': 'en-US,en;q=0.9',
-        },
-      });
+      for (const date of dateStrings) {
+        console.log(`📅 Fetching ${endpoint.league} fixtures for ${date}...`);
+        
+        // Create a new abort controller for each request
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 5000);
+        
+        const res = await fetch(`${endpoint.url}?dates=${date}`, {
+          signal: controller.signal,
+          cache: 'no-store',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+            'Accept': 'application/json',
+            'Accept-Language': 'en-US,en;q=0.9',
+          },
+        });
+        
+        clearTimeout(timeout);
 
-      if (!res.ok) {
-        console.log(`⚠️  ESPN ${endpoint.league} returned ${res.status}`);
-        continue;
+        if (!res.ok) {
+          console.log(`⚠️  ESPN ${endpoint.league} (${date}) returned ${res.status}`);
+          continue;
+        }
+
+        const data = await res.json();
+        const events = data.events || [];
+        console.log(`   Found ${events.length} total events`);
+
+        const upcomingEvents = events.filter((e: any) => {
+          const state = e.status?.type?.state || '';
+          const completed = e.status?.type?.completed || false;
+          return state !== 'in' && !completed; // not live, not finished
+        }).slice(0, 6);
+
+        console.log(`   ${upcomingEvents.length} upcoming fixtures`);
+
+        upcomingEvents.forEach((e: any) => {
+          const comp = e.competitions?.[0] || {};
+          const competitors = comp.competitors || [];
+          const home = competitors.find((c: any) => c.homeAway === 'home') || competitors[0] || {};
+          const away = competitors.find((c: any) => c.homeAway === 'away') || competitors[1] || {};
+
+          const id = e.id || `${endpoint.sport}-${date}-${Math.random().toString(36).slice(2, 7)}`;
+          if (seen.has(id)) return;
+          seen.add(id);
+
+          const match: Match = {
+            id,
+            sport: endpoint.sport,
+            homeTeam: {
+              id: home.team?.id || 'home',
+              name: home.team?.displayName || home.team?.name || home.team?.shortDisplayName || 'Home',
+              logo: home.team?.logo || home.team?.logos?.[0]?.href || '',
+              form: 'N/A',
+              ranking: 0,
+              recentGoals: 0,
+              recentConceded: 0,
+            },
+            awayTeam: {
+              id: away.team?.id || 'away',
+              name: away.team?.displayName || away.team?.name || away.team?.shortDisplayName || 'Away',
+              logo: away.team?.logo || away.team?.logos?.[0]?.href || '',
+              form: 'N/A',
+              ranking: 0,
+              recentGoals: 0,
+              recentConceded: 0,
+            },
+            homeScore: 0,
+            awayScore: 0,
+            status: 'upcoming',
+            startTime: e.date || new Date().toISOString(),
+            league: comp.league?.name || endpoint.league,
+            venue: comp.venue?.fullName || 'TBA',
+          };
+
+          console.log(`   📅 ${match.homeTeam.name} vs ${match.awayTeam.name}`);
+          results.push(match);
+        });
+        
+        // Stop fetching more dates for this league once we have matches
+        if (results.some(m => m.sport === endpoint.sport)) {
+          console.log(`   ✅ Found matches for ${endpoint.league}, skipping remaining dates`);
+          break;
+        }
       }
-
-      const data = await res.json();
-      const events = data.events || [];
-      console.log(`   Found ${events.length} total events`);
-
-      const upcomingEvents = events.filter((e: any) => {
-        const state = e.status?.type?.state || '';
-        const completed = e.status?.type?.completed || false;
-        return state !== 'in' && !completed; // not live, not finished
-      }).slice(0, 6);
-
-      console.log(`   ${upcomingEvents.length} upcoming fixtures`);
-
-      upcomingEvents.forEach((e: any) => {
-        const comp = e.competitions?.[0] || {};
-        const competitors = comp.competitors || [];
-        const home = competitors.find((c: any) => c.homeAway === 'home') || competitors[0] || {};
-        const away = competitors.find((c: any) => c.homeAway === 'away') || competitors[1] || {};
-
-        const match: Match = {
-          id: e.id || `${endpoint.sport}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-          sport: endpoint.sport,
-          homeTeam: {
-            id: home.team?.id || 'home',
-            name: home.team?.displayName || home.team?.name || home.team?.shortDisplayName || 'Home',
-            logo: home.team?.logo || home.team?.logos?.[0]?.href || '',
-            form: 'N/A',
-            ranking: 0,
-            recentGoals: 0,
-            recentConceded: 0,
-          },
-          awayTeam: {
-            id: away.team?.id || 'away',
-            name: away.team?.displayName || away.team?.name || away.team?.shortDisplayName || 'Away',
-            logo: away.team?.logo || away.team?.logos?.[0]?.href || '',
-            form: 'N/A',
-            ranking: 0,
-            recentGoals: 0,
-            recentConceded: 0,
-          },
-          homeScore: 0,
-          awayScore: 0,
-          status: 'upcoming',
-          startTime: e.date || new Date().toISOString(),
-          league: comp.league?.name || endpoint.league,
-          venue: comp.venue?.fullName || 'TBA',
-        };
-
-        console.log(`   📅 ${match.homeTeam.name} vs ${match.awayTeam.name}`);
-        results.push(match);
-      });
     } catch (err) {
       console.error(`❌ Error fetching upcoming for ${endpoint.league}:`, err instanceof Error ? err.message : err);
     }
   }
 
-  clearTimeout(timeout);
-
-  if (results.length > 0) {
-    console.log(`✅ Upcoming fixtures collected: ${results.length}`);
-    return results;
-  }
-  console.log('⚠️  No upcoming fixtures from ESPN, using mock');
-  return mockUpcomingMatches;
+  console.log(`✅ Upcoming fixtures collected: ${results.length}`);
+  return results;
 }
 
 async function hydrateForms(matches: Match[]): Promise<Match[]> {
