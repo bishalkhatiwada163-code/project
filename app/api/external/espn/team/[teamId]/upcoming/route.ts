@@ -105,3 +105,8 @@ export async function GET(request: Request, { params }: { params: { teamId: stri
     });
 
     return NextResponse.json({ success: true, data });
+  } catch (err) {
+    console.error('Error fetching upcoming matches for team:', err);
+    return NextResponse.json({ success: false, error: 'Failed to fetch team upcoming matches' }, { status: 500 });
+  }
+}
