@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { fetchOrSet } from '@/server/cache';
-import cheerio from 'cheerio';
+import * as cheerio from 'cheerio';
 
 const MOCK = [{ id: 'ind1', name: 'Virat Kohli', position: 'Batter', status: 'Active', reason: null, expectedReturn: null }];
 
