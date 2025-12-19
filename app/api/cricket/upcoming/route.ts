@@ -75,14 +75,12 @@ async function fetchUpcomingCricketMatches(): Promise<Match[]> {
             id: home.team?.id || 'home',
             name: home.team?.displayName || home.team?.name || home.team?.shortDisplayName || 'Team 1',
             logo: home.team?.logo || home.team?.logos?.[0]?.href || '',
-            abbreviation: home.team?.abbreviation || '',
             ranking: home.team?.rank || undefined,
           },
           awayTeam: {
             id: away.team?.id || 'away',
             name: away.team?.displayName || away.team?.name || away.team?.shortDisplayName || 'Team 2',
             logo: away.team?.logo || away.team?.logos?.[0]?.href || '',
-            abbreviation: away.team?.abbreviation || '',
             ranking: away.team?.rank || undefined,
           },
           homeScore: undefined,
@@ -91,9 +89,6 @@ async function fetchUpcomingCricketMatches(): Promise<Match[]> {
           startTime: e.date || new Date().toISOString(),
           league: matchFormat,
           venue: comp.venue?.fullName || e.location || '',
-          leagueSlug: league.slug,
-          leagueName: league.name,
-          matchSummary: e.shortName || e.name,
         };
 
         return match;
@@ -143,23 +138,19 @@ export async function GET(request: Request) {
     // Cache for 5 minutes (300 seconds)
     const matches = await fetchOrSet(
       'cricket:upcoming:int',
-      fetchUpcomingCricketMatches,
-      300
+      300,
+      fetchUpcomingCricketMatches
     );
 
     // Filter to ensure we only have T20I, ODI, and Test matches
     const internationalMatches = matches.filter((match: Match) => {
       const league = match.league?.toLowerCase() || '';
-      const summary = match.matchSummary?.toLowerCase() || '';
       
       // Check if it's a T20I, ODI, or Test match
       return (
         league.includes('t20i') || 
         league.includes('odi') || 
-        league.includes('test') ||
-        summary.includes('t20i') ||
-        summary.includes('odi') ||
-        summary.includes('test match')
+        league.includes('test')
       );
     });
 
