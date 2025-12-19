@@ -30,6 +30,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
+      <head>
+        <meta name="google-adsense-account" content="ca-pub-6059627990234892" />
+      </head>
       <body className={inter.className}>
         <Script
           async
