@@ -12,10 +12,8 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'SportPredict - AI-Powered Sports Predictions',
   description: 'Get live scores and AI-powered predictions for football and basketball matches',
-  verification: {
-    other: {
-      'google-adsense-account': 'ca-pub-6059627990234892',
-    },
+  other: {
+    'google-adsense-account': 'ca-pub-6059627990234892',
   },
 };
 
