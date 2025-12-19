@@ -30,13 +30,15 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body className={inter.className}>
-        <Script
+      <head>
+        <script
           async
           src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6059627990234892"
           crossOrigin="anonymous"
-          strategy="afterInteractive"
         />
+        <meta name="google-adsense-account" content="ca-pub-6059627990234892" />
+      </head>
+      <body className={inter.className}>
         <div className="min-h-screen relative overflow-hidden">
           {/* Animated Background Gradient */}
           <div className="fixed inset-0 -z-10">
