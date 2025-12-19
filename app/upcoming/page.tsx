@@ -53,10 +53,6 @@ function UpcomingPageContent() {
     (match) => filter === 'all' || match.sport === filter
   );
 
-  // Get unique sports that have matches
-  const availableSports = Array.from(new Set(matches.map(m => m.sport)));
-  const sportFilters = ['all' as const, ...availableSports];
-
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[60vh]">
@@ -122,7 +118,7 @@ function UpcomingPageContent() {
         className="flex flex-wrap items-center justify-center gap-2 sm:gap-3 md:gap-4 px-4"
       >
         <Filter className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400 hidden sm:block" />
-        {sportFilters.map((sport) => (
+        {(['all', 'football', 'basketball', 'cricket'] as const).map((sport) => (
           <motion.button
             key={sport}
             whileHover={{ scale: 1.05 }}
@@ -198,6 +194,39 @@ function UpcomingPageContent() {
           ))}
         </motion.div>
       )}
+
+      {/* Stats Summary */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="glass-card p-6 text-center"
+      >
+        <div className="flex items-center justify-around flex-wrap gap-6">
+          <div>
+            <p className="text-3xl font-bold gradient-text">{matches.length}</p>
+            <p className="text-gray-400 text-sm">Total Upcoming</p>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-green-400">
+              {matches.filter((m) => m.sport === 'football').length}
+            </p>
+            <p className="text-gray-400 text-sm">⚽ Football</p>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-orange-400">
+              {matches.filter((m) => m.sport === 'basketball').length}
+            </p>
+            <p className="text-gray-400 text-sm">🏀 Basketball</p>
+          </div>
+          <div>
+            <p className="text-3xl font-bold text-cyan-400">
+              {matches.filter((m) => m.sport === 'cricket').length}
+            </p>
+            <p className="text-gray-400 text-sm">🏏 Cricket</p>
+          </div>
+        </div>
+      </motion.div>
 
       {/* Confidence Stats */}
       <motion.div

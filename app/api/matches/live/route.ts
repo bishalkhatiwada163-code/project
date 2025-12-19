@@ -90,6 +90,64 @@ const mockLiveMatches: Match[] = [
     venue: 'Melbourne Cricket Ground',
     minute: 38,
   },
+  {
+    id: 'live-cricket-2',
+    sport: 'cricket',
+    homeTeam: {
+      id: 'eng',
+      name: 'England',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/5f/England_Cricket_Board.svg/200px-England_Cricket_Board.svg.png',
+      form: 'WLWLW',
+      ranking: 3,
+      recentGoals: 1420,
+      recentConceded: 1380,
+    },
+    awayTeam: {
+      id: 'pak',
+      name: 'Pakistan',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/04/Pakistan_Cricket_Board_Logo.svg/200px-Pakistan_Cricket_Board_Logo.svg.png',
+      form: 'LWLWW',
+      ranking: 5,
+      recentGoals: 1390,
+      recentConceded: 1410,
+    },
+    homeScore: 165,
+    awayScore: 142,
+    status: 'live',
+    startTime: new Date().toISOString(),
+    league: 'T20 International',
+    venue: 'Lords Cricket Ground',
+    minute: 28,
+  },
+  {
+    id: 'live-cricket-3',
+    sport: 'cricket',
+    homeTeam: {
+      id: 'mi',
+      name: 'Mumbai Indians',
+      logo: 'https://documents.iplt20.com/ipl/MI/logos/Logooutline/MIoutline.png',
+      form: 'WWLWW',
+      ranking: 2,
+      recentGoals: 890,
+      recentConceded: 845,
+    },
+    awayTeam: {
+      id: 'csk',
+      name: 'Chennai Super Kings',
+      logo: 'https://documents.iplt20.com/ipl/CSK/Logos/Logooutline/CSKoutline.png',
+      form: 'WLWWL',
+      ranking: 1,
+      recentGoals: 920,
+      recentConceded: 860,
+    },
+    homeScore: 187,
+    awayScore: 145,
+    status: 'live',
+    startTime: new Date().toISOString(),
+    league: 'Indian Premier League',
+    venue: 'Wankhede Stadium',
+    minute: 15,
+  },
 ];
 
 async function fetchRemoteLiveMatches(): Promise<Match[] | null> {
@@ -100,12 +158,16 @@ async function fetchRemoteLiveMatches(): Promise<Match[] | null> {
   const timeout = setTimeout(() => controller.abort(), 8000);
 
   const endpoints = [
+    // Football
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard', sport: 'football' as const, league: 'Premier League' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/usa.1/scoreboard', sport: 'football' as const, league: 'MLS' },
+    
+    // Basketball
     { url: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard', sport: 'basketball' as const, league: 'NBA' },
+    
+    // Cricket - Only International and BBL
     { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/int/scoreboard', sport: 'cricket' as const, league: 'International Cricket' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/aus-bbl/scoreboard', sport: 'cricket' as const, league: 'Big Bash League' },
-    { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/ind-ipl/scoreboard', sport: 'cricket' as const, league: 'Indian Premier League' },
   ];
 
   const results: Match[] = [];
@@ -190,11 +252,14 @@ async function fetchRemoteLiveMatches(): Promise<Match[] | null> {
   clearTimeout(timeout);
   
   if (results.length > 0) {
-    console.log(`✅ ${results.length} LIVE matches found`);
+    console.log(`✅ ${results.length} LIVE matches found from ESPN API`);
+    console.log(`   ⚽ Football: ${results.filter(m => m.sport === 'football').length}`);
+    console.log(`   🏀 Basketball: ${results.filter(m => m.sport === 'basketball').length}`);
+    console.log(`   🏏 Cricket: ${results.filter(m => m.sport === 'cricket').length}`);
     return results;
   }
   
-  console.log('⚠️  No live matches happening right now');
+  console.log('⚠️  No live matches happening right now from ESPN API');
   return [];
 }
 

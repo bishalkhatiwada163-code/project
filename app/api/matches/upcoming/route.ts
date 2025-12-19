@@ -212,6 +212,84 @@ const mockUpcomingMatches: Match[] = [
     venue: 'Kensington Oval',
   },
   {
+    id: 'upcoming-cricket-3',
+    sport: 'cricket',
+    homeTeam: {
+      id: 'mi',
+      name: 'Mumbai Indians',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/c/cd/Mumbai_Indians_Logo.svg/200px-Mumbai_Indians_Logo.svg.png',
+      form: 'WWLWW',
+      ranking: 1,
+      recentGoals: 890,
+      recentConceded: 845,
+    },
+    awayTeam: {
+      id: 'csk',
+      name: 'Chennai Super Kings',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/2/2b/Chennai_Super_Kings_Logo.svg/200px-Chennai_Super_Kings_Logo.svg.png',
+      form: 'WLWWL',
+      ranking: 2,
+      recentGoals: 875,
+      recentConceded: 860,
+    },
+    status: 'upcoming',
+    startTime: new Date(Date.now() + 28 * 60 * 60 * 1000).toISOString(),
+    league: 'Indian Premier League',
+    venue: 'Wankhede Stadium',
+  },
+  {
+    id: 'upcoming-cricket-4',
+    sport: 'cricket',
+    homeTeam: {
+      id: 'ss',
+      name: 'Sydney Sixers',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/0d/Sydney_Sixers_logo.svg/200px-Sydney_Sixers_logo.svg.png',
+      form: 'WWWLW',
+      ranking: 1,
+      recentGoals: 780,
+      recentConceded: 720,
+    },
+    awayTeam: {
+      id: 'ms',
+      name: 'Melbourne Stars',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e2/Melbourne_Stars_logo.svg/200px-Melbourne_Stars_logo.svg.png',
+      form: 'LWWWL',
+      ranking: 3,
+      recentGoals: 765,
+      recentConceded: 775,
+    },
+    status: 'upcoming',
+    startTime: new Date(Date.now() + 36 * 60 * 60 * 1000).toISOString(),
+    league: 'Big Bash League',
+    venue: 'Sydney Cricket Ground',
+  },
+  {
+    id: 'upcoming-cricket-5',
+    sport: 'cricket',
+    homeTeam: {
+      id: 'pak',
+      name: 'Pakistan',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/f/fc/Pakistan_Cricket_Board_Logo.svg/200px-Pakistan_Cricket_Board_Logo.svg.png',
+      form: 'WLWWW',
+      ranking: 5,
+      recentGoals: 1390,
+      recentConceded: 1365,
+    },
+    awayTeam: {
+      id: 'ban',
+      name: 'Bangladesh',
+      logo: 'https://upload.wikimedia.org/wikipedia/en/thumb/5/5c/Bangladesh_Cricket_Board_Logo.svg/200px-Bangladesh_Cricket_Board_Logo.svg.png',
+      form: 'LWLWL',
+      ranking: 9,
+      recentGoals: 1270,
+      recentConceded: 1340,
+    },
+    status: 'upcoming',
+    startTime: new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString(),
+    league: 'Asia Cup',
+    venue: 'National Stadium Karachi',
+  },
+  {
     id: 'upcoming-9',
     sport: 'football',
     homeTeam: {
@@ -449,15 +527,19 @@ const mockUpcomingMatches: Match[] = [
 
 async function fetchUpcomingFromESPN(): Promise<Match[]> {
   const endpoints = [
+    // Football
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/eng.1/scoreboard', sport: 'football' as const, league: 'Premier League' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/esp.1/scoreboard', sport: 'football' as const, league: 'La Liga' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/ger.1/scoreboard', sport: 'football' as const, league: 'Bundesliga' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/ita.1/scoreboard', sport: 'football' as const, league: 'Serie A' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/soccer/fra.1/scoreboard', sport: 'football' as const, league: 'Ligue 1' },
+    
+    // Basketball
     { url: 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard', sport: 'basketball' as const, league: 'NBA' },
+    
+    // Cricket - Only International (Tests, ODIs, T20Is) and BBL
     { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/int/scoreboard', sport: 'cricket' as const, league: 'International Cricket' },
     { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/aus-bbl/scoreboard', sport: 'cricket' as const, league: 'Big Bash League' },
-    { url: 'https://site.api.espn.com/apis/site/v2/sports/cricket/ind-ipl/scoreboard', sport: 'cricket' as const, league: 'Indian Premier League' },
   ];
 
   // Pull multiple days to ensure upcoming lists for basketball/cricket even when today is empty
@@ -629,6 +711,11 @@ export async function GET() {
   const { fetchOrSet } = await import('@/server/cache');
   const ttl = Number(process.env.CACHE_TTL_UPCOMING || '60');
   let data = await fetchOrSet('upcoming:all', ttl, fetchUpcomingFromESPN);
+
+  console.log(`✅ Returning ${data.length} real upcoming matches from ESPN`);
+  console.log(`   Football: ${data.filter((m: Match) => m.sport === 'football').length}`);
+  console.log(`   Basketball: ${data.filter((m: Match) => m.sport === 'basketball').length}`);
+  console.log(`   Cricket: ${data.filter((m: Match) => m.sport === 'cricket').length}`);
 
   // Precompute form to avoid client fetches
   data = await hydrateForms(data);

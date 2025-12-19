@@ -1,9 +1,11 @@
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
+import Script from 'next/script';
 import './globals.css';
 // server cron: warming/cache scheduling
 import '@/server/cron';
 import Navigation from '@/components/Navigation';
+import AdSense from '@/components/AdSense';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -21,6 +23,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
+        <Script
+          async
+          src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6059692799023489"
+          crossOrigin="anonymous"
+          strategy="afterInteractive"
+        />
         <div className="min-h-screen relative overflow-hidden">
           {/* Animated Background Gradient */}
           <div className="fixed inset-0 -z-10">
@@ -34,6 +42,9 @@ export default function RootLayout({
           <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
             {children}
           </main>
+
+          {/* Google AdSense */}
+          <AdSense />
 
           {/* Footer */}
           <footer className="mt-20 py-8 border-t border-white/10">
