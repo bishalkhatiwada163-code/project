@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { Match } from '@/lib/types';
 import { fetchOrSet } from '@/server/cache';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 // Helper that fetches from a configured template or falls back to filtering
 async function fetchFromExternal(url: string | undefined) {
   if (!url) return null;

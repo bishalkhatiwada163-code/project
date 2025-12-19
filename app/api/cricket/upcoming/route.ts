@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { Match } from '@/lib/types';
 import { fetchOrSet } from '@/server/cache';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 /**
  * Dedicated API endpoint for fetching upcoming cricket matches from NATIONAL TEAMS ONLY
  * This endpoint provides coverage of upcoming international cricket:

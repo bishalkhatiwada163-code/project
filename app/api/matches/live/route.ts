@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { Match } from '@/lib/types';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 // Mock data for live matches (one per sport to keep responses light and reliable)
 const mockLiveMatches: Match[] = [
   {

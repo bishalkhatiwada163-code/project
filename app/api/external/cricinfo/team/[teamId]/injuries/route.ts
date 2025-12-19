@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { fetchOrSet } from '@/server/cache';
 import * as cheerio from 'cheerio';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 const MOCK = [{ id: 'ind1', name: 'Virat Kohli', position: 'Batter', status: 'Active', reason: null, expectedReturn: null }];
 
 async function fetchHtml(url: string) {

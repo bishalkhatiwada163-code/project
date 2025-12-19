@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { keys as cacheKeys, del as cacheDel, inMemoryKeys } from '@/server/cache';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 // Simple admin authorization using header token
 function isAuthorized(req: Request) {
   const token = process.env.ADMIN_TOKEN;

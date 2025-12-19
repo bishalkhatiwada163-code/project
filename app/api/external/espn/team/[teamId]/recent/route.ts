@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { fetchOrSet } from '@/server/cache';
 import { normalizeEventsToRecent } from '@/server/adapters/espn';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 /**
  * Returns recent matches for a given team. This endpoint attempts to use
  * a configured external ESPN-like feed (via env var), and falls back to

@@ -1,5 +1,8 @@
 import { NextResponse } from 'next/server';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 function isAuthorized(req: Request) {
   const token = process.env.ADMIN_TOKEN;
   if (!token) return false;

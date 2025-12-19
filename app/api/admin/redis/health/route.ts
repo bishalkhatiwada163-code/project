@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const runtime = 'nodejs';
+
 export async function GET() {
   const redisUrl = process.env.REDIS_URL || process.env.REDIS_URI;
   if (!redisUrl) return NextResponse.json({ success: false, available: false, reason: 'REDIS_URL not configured' });

@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { fetchOrSet } from '@/server/cache';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 const MOCK_PLAYER = {
   id: 'p1',
   name: 'John Doe',

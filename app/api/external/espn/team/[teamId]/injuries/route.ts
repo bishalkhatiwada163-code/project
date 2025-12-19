@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { fetchOrSet } from '@/server/cache';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 const MOCK_INJURIES = [
   { id: 'p1', name: 'John Doe', position: 'Forward', status: 'Out', reason: 'Hamstring', expectedReturn: '2025-12-23' },
   { id: 'p2', name: 'Alex Smith', position: 'Midfielder', status: 'Doubtful', reason: 'Ankle', expectedReturn: null },

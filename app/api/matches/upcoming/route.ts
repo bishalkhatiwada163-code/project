@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import { Match, SportType } from '@/lib/types';
 
+export const runtime = 'nodejs';
+export const dynamic = 'force-dynamic';
+
 // Fallback mock data (used only if ESPN returns nothing)
 const mockUpcomingMatches: Match[] = [
   {
